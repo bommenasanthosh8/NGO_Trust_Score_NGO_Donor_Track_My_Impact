@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TrustScore NGO — Advanced SIH Prototype</title>
+<style>
+:root{--nav:#102a43;--nav2:#173e5b;--accent:#28a883;--bg:#f4f7fb;--card:#fff;--text:#172033;--muted:#728096;--line:#e5eaf0;--green:#16845c;--yellow:#b77700;--red:#c44848;--shadow:0 8px 28px rgba(19,43,68,.07)}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--text)}
+.app{display:flex;min-height:100vh}.sidebar{width:260px;background:linear-gradient(180deg,var(--nav),#0c2032);color:#dce8f1;position:fixed;inset:0 auto 0 0;padding:22px 15px;z-index:5}
+.logo{font-weight:900;font-size:22px;color:#fff;padding:7px 13px 28px}.logo b{color:#58d0ad}.role{font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:#9bb3c7;padding:0 13px 8px}
+.nav button{width:100%;border:0;background:none;color:#cbd9e4;text-align:left;padding:12px 13px;border-radius:10px;margin:3px 0;font-size:14px;cursor:pointer}.nav button:hover,.nav button.active{background:var(--nav2);color:#fff}.nav button span{float:right;color:#7fd6bd;font-size:11px}
+.bottom{position:absolute;bottom:20px;left:15px;right:15px;border-top:1px solid #28465c;padding-top:14px;font-size:12px;color:#9db2c3}
+.main{margin-left:260px;width:calc(100% - 260px);padding:24px 34px}.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px}.topbar h1{font-size:25px;margin:0}.top-actions{display:flex;gap:10px;align-items:center}.search{background:#fff;border:1px solid var(--line);padding:10px 13px;border-radius:10px;width:230px}.profile{background:#fff;border:1px solid var(--line);border-radius:20px;padding:9px 13px;font-size:13px}
+.page{display:none}.page.active{display:block}.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:15px}.card,.panel{background:var(--card);border:1px solid var(--line);border-radius:15px;box-shadow:var(--shadow)}.card{padding:18px}.label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}.value{font-size:27px;font-weight:850;margin:7px 0}.sub{font-size:11px;color:var(--muted)}.green{color:var(--green)}.yellow{color:var(--yellow)}.red{color:var(--red)}
+.grid{display:grid;grid-template-columns:1.45fr 1fr;gap:17px;margin-top:18px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:17px;margin-top:18px}.panel{padding:20px}.panel h2,.panel h3{margin:0 0 15px}.panel h2{font-size:17px}.panel h3{font-size:15px}.row{display:flex;justify-content:space-between;align-items:center;padding:13px 0;border-bottom:1px solid #edf0f4;font-size:13px}.row:last-child{border-bottom:0}.badge{padding:5px 9px;border-radius:20px;font-size:10px;font-weight:800}.verified{background:#def6eb;color:#167454}.medium{background:#fff0cf;color:#946300}.high{background:#ffe0e0;color:#a63d3d}
+.btn{border:0;padding:10px 14px;border-radius:9px;cursor:pointer;font-weight:750;font-size:12px}.primary{background:var(--accent);color:#fff}.secondary{background:#edf2f6;color:#304458}.outline{background:#fff;border:1px solid var(--line)}
+.hero{background:linear-gradient(120deg,#123b58,#176d66);color:#fff;border-radius:17px;padding:25px;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center}.hero h2{margin:0 0 7px;font-size:23px}.hero p{margin:0;color:#cde2e5;font-size:13px}.hero-score{text-align:center}.hero-score strong{font-size:45px}.hero-score small{display:block;color:#cde2e5}
+.progress{height:9px;background:#edf1f5;border-radius:8px;overflow:hidden}.progress i{display:block;height:100%;background:var(--accent)}
+.score-ring{width:145px;height:145px;border-radius:50%;border:12px solid #d9f0e9;outline:7px solid #55b89d;display:flex;align-items:center;justify-content:center;flex-direction:column;margin:5px auto 15px}.score-ring strong{font-size:38px}.score-ring small{font-size:11px;color:var(--muted)}
+.chart{height:155px;display:flex;align-items:end;gap:12px;padding:15px 5px 0}.barcol{flex:1;text-align:center;font-size:10px;color:var(--muted)}.barcol i{display:block;width:70%;margin:auto;background:#55b89d;border-radius:6px 6px 0 0}.timeline{display:flex;gap:0;margin:20px 0}.t{flex:1;text-align:center;position:relative;font-size:10px;color:var(--muted)}.t:before{content:"";display:block;width:24px;height:24px;border-radius:50%;background:#e6edf2;margin:0 auto 7px}.t.done:before{background:var(--accent);box-shadow:0 0 0 4px #d9f2e9}.t:after{content:"";height:2px;background:#e1e7ed;position:absolute;top:11px;left:50%;width:100%;z-index:-1}.t:last-child:after{display:none}.t.done{color:#176b56;font-weight:700}
+.formgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;align-items:start}.formgrid>label{display:block;min-width:0;font-size:12px;font-weight:750}.formgrid>label input,.formgrid>label textarea,.formgrid>label select{display:block;box-sizing:border-box}.field label{display:block;font-size:12px;font-weight:750}.field input,.field textarea,.field select{width:100%;padding:11px;border:1px solid #d9e0e7;border-radius:9px;margin-top:6px;font:inherit}.field textarea{min-height:90px}.full{grid-column:1/-1}.drop{border:2px dashed #cbd7e0;border-radius:12px;padding:25px;text-align:center;color:var(--muted);background:#fafcfd}.drop strong{display:block;color:#304458;margin-bottom:5px}
+.tabs{display:flex;gap:7px;margin-bottom:16px}.tab{border:1px solid var(--line);background:#fff;padding:9px 13px;border-radius:8px;cursor:pointer;font-size:12px}.tab.on{background:#e0f5ee;color:#126c54;border-color:#b9e4d6;font-weight:750}
+table{width:100%;border-collapse:collapse;font-size:12px}th,td{text-align:left;padding:12px;border-bottom:1px solid #edf0f4}th{color:var(--muted);font-size:10px;text-transform:uppercase}
+.audit{display:grid;grid-template-columns:28px 1fr;gap:10px;margin:13px 0}.dot{width:25px;height:25px;border-radius:50%;background:#dff4ec;color:#167454;text-align:center;padding-top:5px;font-size:11px;font-weight:800}
+.notice{padding:13px;border-radius:10px;background:#fff7df;border:1px solid #efd68d;font-size:12px}.success{background:#e7f7f0;border-color:#b8e4d4}.riskbox{display:flex;gap:12px;align-items:center;padding:14px;border-radius:12px;background:#fff7df;border:1px solid #efd68d}
+.toast{position:fixed;right:25px;bottom:25px;background:#132d43;color:white;padding:13px 16px;border-radius:10px;display:none;box-shadow:var(--shadow);z-index:10;font-size:12px}
+.modal{display:none;position:fixed;inset:0;background:#0a1c2d88;align-items:center;justify-content:center;z-index:20}.modalbox{background:#fff;width:min(520px,92%);border-radius:16px;padding:24px}.modalbox h2{margin-top:0}
+@media(max-width:1050px){.cards{grid-template-columns:repeat(2,1fr)}.grid,.grid3{grid-template-columns:1fr}.search{display:none}}
+@media(max-width:700px){.sidebar{display:none}.main{margin:0;width:100%;padding:18px}.cards,.formgrid{grid-template-columns:1fr}.full{grid-column:auto}.hero{align-items:flex-start;gap:20px;flex-direction:column}}
+
+.auth-overlay{position:fixed;inset:0;background:linear-gradient(135deg,#0d263b,#176d66);z-index:50;display:flex;align-items:center;justify-content:center;padding:20px}
+.auth-card{width:min(440px,100%);background:#fff;border-radius:20px;padding:30px;box-shadow:0 25px 70px #071b2b88}
+.auth-brand{text-align:center;font-size:25px;font-weight:900;color:#102a43;margin-bottom:5px}.auth-brand b{color:#28a883}
+.auth-sub{text-align:center;color:#728096;font-size:12px;margin-bottom:24px}.auth-tabs{display:flex;background:#f1f4f7;border-radius:10px;padding:4px;margin-bottom:20px}.auth-tabs button{flex:1;border:0;padding:10px;background:transparent;border-radius:8px;cursor:pointer;font-weight:700;color:#657286}.auth-tabs button.on{background:#fff;color:#176d66;box-shadow:0 2px 7px #102a4312}
+.auth-form{display:grid;gap:12px}.auth-form label{font-size:12px;font-weight:750}.auth-form input{width:100%;padding:12px;border:1px solid #d9e0e7;border-radius:9px;margin-top:6px}.password-wrap{position:relative}.password-wrap input{padding-right:70px}.showpass{position:absolute;right:8px;bottom:7px;border:0;background:none;color:#176d66;font-size:11px;cursor:pointer}.auth-msg{font-size:11px;padding:10px;border-radius:8px;display:none}.auth-msg.error{display:block;background:#fff0f0;color:#a63d3d}.auth-msg.ok{display:block;background:#e7f7f0;color:#176b56}
+.auth-help{text-align:center;font-size:11px;color:#728096;margin-top:16px}.req{font-size:10px;color:#728096;margin-top:-5px}
+
+.auth-card-wide{width:min(500px,100%)}
+.role-picker{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 18px}
+.role-card{border:1px solid #dfe6ec;background:#f8fafc;border-radius:12px;padding:13px 10px;text-align:left;cursor:pointer;transition:.18s}
+.role-card:hover{border-color:#9bcfc0;transform:translateY(-1px)}
+.role-card.on{background:#e9f7f2;border:2px solid #28a883;padding:12px 9px;box-shadow:0 4px 14px #28a88318}
+.role-icon{font-size:22px;display:block;margin-bottom:5px}.role-card strong{display:block;font-size:12px;color:#183247}.role-card small{display:block;color:#728096;font-size:10px;line-height:1.35;margin-top:4px}
+.selected-role{background:#f3f7f9;border:1px solid #e1e8ed;border-radius:8px;padding:9px 11px;color:#536578;font-size:11px}
+@media(max-width:500px){.role-picker{grid-template-columns:1fr}}
+.settings-grid{display:grid;grid-template-columns:220px 1fr;gap:17px}.settings-menu{background:#fff;border:1px solid var(--line);border-radius:15px;padding:10px;height:max-content}.settings-menu button{width:100%;border:0;background:none;text-align:left;padding:11px;border-radius:8px;cursor:pointer;font-size:12px}.settings-menu button.on,.settings-menu button:hover{background:#e6f5f0;color:#146c55;font-weight:750}.setting-pane{display:none}.setting-pane.active{display:block}.toggle{width:40px;height:22px;border-radius:20px;background:#cbd5df;position:relative;cursor:pointer}.toggle:after{content:"";width:16px;height:16px;background:white;border-radius:50%;position:absolute;top:3px;left:3px;transition:.2s}.toggle.on{background:#28a883}.toggle.on:after{left:21px}.setting-row{display:flex;justify-content:space-between;gap:20px;padding:15px 0;border-bottom:1px solid #edf0f4}.setting-row:last-child{border:0}.setting-row strong{font-size:13px}.setting-row small{display:block;color:#728096;margin-top:4px;font-size:11px;line-height:1.5}
+
+
+.gpsbox{border:1px dashed #b8c5d6;border-radius:14px;padding:14px;background:#f8fbff}.gpsrow{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.gpsdata{font-size:12px;color:#59677a;line-height:1.6}.capture-input{display:none}.capture-btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:44px;cursor:pointer}.maplink{display:inline-block;margin-top:8px;font-size:12px;font-weight:700}.evidence-card{border:1px solid #e0e6ee;border-radius:12px;padding:12px;margin-top:10px;background:white}.evidence-thumb{width:88px;height:66px;object-fit:cover;border-radius:8px;border:1px solid #d9e0e8}.project-actions{display:flex;gap:7px;flex-wrap:wrap}.project-page-head,.project-editor-head{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}.project-head-actions{display:flex;gap:8px;flex-wrap:wrap}.workflow-strip{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:16px;padding:11px 13px;border:1px solid #dfe7ef;border-radius:10px;background:#f8fbff;color:#526174;font-size:12px;font-weight:700}.workflow-strip b{color:#8b9aad}.project-card{padding:16px}.project-card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap}.project-card-actions{display:flex;gap:7px;flex-wrap:wrap}.project-status-row{display:flex;align-items:center;gap:9px;margin-top:9px}.project-progress{margin-top:12px}.project-progress>div:first-child{display:flex;justify-content:space-between;font-size:12px;color:#617084}.progress-track{height:7px;background:#e8edf3;border-radius:99px;overflow:hidden;margin-top:6px}.progress-track i{display:block;height:100%;background:#2f7d63;border-radius:99px}.quick-edit-hint{margin-top:12px;padding:9px 11px;border-radius:8px;background:#f6f8fa;font-size:11px;color:#657386}.editor-note{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding-top:4px;color:#657386;font-size:12px}.mini{font-size:11px}.muted{color:#6d7a8b}.project-management-panel{width:100%;box-sizing:border-box}.project-management-panel .formgrid{margin-top:18px}.project-management-panel .formgrid>label{background:#fbfcfe;border:1px solid #e2e8ef;border-radius:10px;padding:11px 12px;box-sizing:border-box}.project-management-panel .formgrid>label.full{width:100%}.project-management-panel input,.project-management-panel textarea,.project-management-panel select{background:#fff}.project-management-panel textarea{resize:vertical}.project-list{display:grid;gap:14px;margin-top:18px}.project-page-panel{width:100%;box-sizing:border-box}.inline-project-editor{margin-top:18px;padding:18px;border:1px solid #cfe2dc;border-radius:14px;background:#f8fcfa}.inline-project-editor .formgrid{margin-top:16px}.inline-project-editor .formgrid>label{background:#fff;border:1px solid #e2e8ef;border-radius:10px;padding:11px 12px;box-sizing:border-box}.inline-project-editor .formgrid>label.full{width:100%}.inline-project-editor input,.inline-project-editor textarea{background:#fff}.inline-project-editor textarea{resize:vertical}.projects-list-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:22px;padding-top:16px;border-top:1px solid #e6ebef}
+
+
+/* Projects open with the editor visible at the top so key information is immediately accessible. */
+.projects-page-intro{margin-bottom:12px}.inline-project-editor{display:block}.inline-project-editor .formgrid{margin-bottom:4px}.projects-list-head{margin-top:18px}
+/* Final layout fixes: keep every page readable and prevent duplicate/bottom content. */
+.main{min-height:100vh;overflow-x:hidden}.page{width:100%;max-width:1400px;margin:0 auto}.project-page-panel{padding:22px}.project-page-head{position:relative;z-index:2}.inline-project-editor{scroll-margin-top:20px}.projects-list-head{position:relative;z-index:1}.project-list{padding-bottom:24px}.project-card{overflow:visible}.project-card-top h3{max-width:720px;word-break:break-word}
+@media(min-width:701px){.main{padding-top:20px}.topbar{position:sticky;top:0;background:var(--bg);z-index:4;padding:4px 0 16px}.project-page-panel{min-height:calc(100vh - 90px)}}
+
+.project-overview{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-top:18px}.project-overview-card{border:1px solid #dfe6ee;border-radius:14px;padding:16px;background:#fff}.project-overview-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.project-overview-card h3{margin:0 0 6px;font-size:16px}.project-meta{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:13px}.project-meta div{background:#f7f9fb;border-radius:9px;padding:9px}.project-meta small{display:block;color:#758296;font-size:10px;margin-bottom:3px}.project-meta b{font-size:13px}.milestone-line{margin-top:12px;padding-top:10px;border-top:1px solid #edf0f3;font-size:12px;line-height:1.55;color:#59677a}.project-detail-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}.project-detail-modal{max-width:720px;width:calc(100% - 32px);max-height:85vh;overflow:auto}.detail-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px}.detail-item{padding:11px;border:1px solid #e1e7ed;border-radius:9px}.detail-item small{display:block;color:#748094;font-size:10px;margin-bottom:4px}.detail-item b{font-size:13px}.detail-wide{grid-column:1/-1}.detail-progress{height:9px;background:#e9edf2;border-radius:99px;overflow:hidden;margin-top:7px}.detail-progress i{display:block;height:100%;background:#2f7d63}.
+@media(max-width:700px){.detail-grid{grid-template-columns:1fr}.detail-wide{grid-column:auto}.project-meta{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="auth-overlay" id="authOverlay">
+  <div class="auth-card auth-card-wide">
+    <div class="auth-brand">Trust<b>Score</b></div>
+    <div class="auth-sub">Evidence Based Donation Transparency • SIH 2026 Prototype</div>
+
+    <div class="role-picker" id="authRolePicker">
+      <button class="role-card on" id="ngoRoleBtn" onclick="setAuthRole('ngo')"><span class="role-icon">🏢</span><strong>NGO / Organization</strong><small>Manage campaigns, evidence & trust score</small></button>
+      <button class="role-card" id="donorRoleBtn" onclick="setAuthRole('donor')"><span class="role-icon">💙</span><strong>Donor</strong><small>Discover verified campaigns & donate</small></button>
+    </div>
+
+    <div class="auth-tabs">
+      <button id="loginTab" class="on" onclick="authMode('login')">Sign In</button>
+      <button id="registerTab" onclick="authMode('register')">Create Account</button>
+    </div>
+
+    <form id="loginForm" class="auth-form" onsubmit="login(event)">
+      <div class="selected-role" id="loginRoleHint">Signing in as <b>NGO / Organization</b></div>
+      <label>Email
+        <input id="loginEmail" type="email" placeholder="ngo@example.com" required>
+      </label>
+      <label>Password
+        <div class="password-wrap"><input id="loginPassword" type="password" placeholder="Enter password" required><button type="button" class="showpass" onclick="togglePassword('loginPassword',this)">Show</button></div>
+      </label>
+      <div id="loginMsg" class="auth-msg"></div>
+      <button class="btn primary" style="width:100%;padding:13px">Sign In</button>
+      <div class="auth-help">Use the account type you selected above. NGO and Donor accounts are completely separate.</div>
+    </form>
+
+    <form id="registerForm" class="auth-form" style="display:none" onsubmit="register(event)">
+      <div class="selected-role" id="registerRoleHint">Creating <b>NGO / Organization</b> account</div>
+      <div id="ngoRegisterFields">
+        <label>NGO / Organization Name<input id="regOrg" placeholder="Enter registered NGO name"></label>
+      </div>
+      <div id="donorRegisterFields" style="display:none">
+        <label>Full Name<input id="regName" placeholder="Enter your full name"></label>
+      </div>
+      <label>Email<input id="regEmail" type="email" placeholder="you@example.com" required></label>
+      <label>Create Password
+        <div class="password-wrap"><input id="regPassword" type="password" placeholder="Minimum 8 characters" minlength="8" required oninput="checkStrength()"><button type="button" class="showpass" onclick="togglePassword('regPassword',this)">Show</button></div>
+      </label>
+      <div class="req" id="strength">Password strength: —</div>
+      <label>Confirm Password<input id="regConfirm" type="password" placeholder="Re-enter password" minlength="8" required></label>
+      <div id="regMsg" class="auth-msg"></div>
+      <button class="btn primary" style="width:100%;padding:13px">Create <span id="createRoleText">NGO</span> Account</button>
+      <div class="auth-help">Your selected role determines which portal you enter after signing in.</div>
+    </form>
+  </div>
+</div>>
+
+<div class="app">
+<aside class="sidebar">
+<div class="logo">Trust<b>Score</b> NGO</div>
+<div class="role">Platform Console</div>
+<div class="nav" id="ngoNav">
+<button class="active" onclick="go('dashboard',this)">▦ Dashboard</button>
+<button onclick="go('projectDetailsNgo',this)">📋 Project Details</button>
+<button onclick="go('org',this)">🏢 Organization Profile</button>
+<button onclick="go('updates',this)">📢 Donor Updates</button>
+<button onclick="go('funds',this)">💰 Fund Tracking</button>
+<button onclick="go('evidence',this)">◈ Evidence Upload</button>
+<button onclick="go('verify',this)">✓ Verification</button>
+<button onclick="go('score',this)">★ Trust Score</button>
+</div>
+<div class="nav" id="donorNav" style="display:none">
+<button onclick="go('donate',this)">💰 Donate</button>
+<button onclick="go('impact',this)">📈 Track My Impact</button>
+</div>
+<div class="role" style="margin-top:25px">Account</div>
+<div class="nav"><button onclick="go('settings',this)">⚙ Profile / Settings</button><button onclick="toast('Audit logs are simulated for the prototype.')">▤ Audit Logs</button></div>
+<div class="bottom">SMART INDIA HACKATHON 2026<br>Evidence Based Donation Transparency<br><button class="btn secondary" style="margin-top:10px" onclick="logout()">Sign Out</button></div>
+</aside>
+
+<main class="main">
+<div class="topbar"><h1 id="title">NGO Trust Dashboard</h1><div class="top-actions"><input class="search" placeholder="Search campaigns..." oninput="filterRows(this.value)"><div class="profile">Tensor NGO ▾</div></div></div>
+
+<section id="dashboard" class="page active">
+<div class="hero"><div><h2>Evidence-backed donation transparency</h2><p>Automated-first verification with explainable trust signals.</p></div><div class="hero-score"><strong>91</strong><small>NGO TRUST SCORE / 100</small></div></div>
+<div class="cards">
+<div class="card"><div class="label">Total Donations</div><div class="value">₹1.75L</div><div class="sub green">↑ 12.4% this quarter</div></div>
+<div class="card"><div class="label">Completed Utilization</div><div class="value">₹1.62L</div><div class="sub">92.6% of donations</div></div>
+<div class="card"><div class="label">Verified Campaigns</div><div class="value">8/10</div><div class="sub green">80% verified</div></div>
+<div class="card"><div class="label">Risk Flags</div><div class="value yellow">2</div><div class="sub">1 medium • 1 review</div></div>
+</div>
+<div class="grid">
+<div class="panel"><h2>Trust Score Trend</h2><div class="chart"><div class="barcol"><i style="height:65px"></i>Jan</div><div class="barcol"><i style="height:75px"></i>Feb</div><div class="barcol"><i style="height:82px"></i>Mar</div><div class="barcol"><i style="height:92px"></i>Apr</div><div class="barcol"><i style="height:105px"></i>May</div><div class="barcol"><i style="height:118px"></i>Jun</div><div class="barcol"><i style="height:125px"></i>Jul</div><div class="barcol"><i style="height:135px"></i>Aug</div></div></div>
+<div class="panel"><h2>Risk Queue</h2><div class="riskbox"><b class="yellow">MEDIUM</b><span>Medical Aid Drive<br><small>Invoice mismatch + media duplicate</small></span></div><div class="riskbox" style="margin-top:10px;background:#fff0f0;border-color:#f1c2c2"><b class="red">REVIEW</b><span>School Support<br><small>Awaiting recipient evidence</small></span></div></div>
+</div>
+<div class="panel" style="margin-top:18px"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><div><h2 style="margin:0">Project Details</h2><small>Live project information linked to your evidence and verification records.</small></div><span class="badge verified">TRANSPARENCY VIEW</span></div><div id="ngoProjectOverview" class="project-overview"></div></div>
+<div class="panel" style="margin-top:18px"><h2>Recent Activity</h2><div class="audit"><div class="dot">✓</div><div><b>GPS verified</b><br><small>Community Food Drive • 8 min ago</small></div></div><div class="audit"><div class="dot">₹</div><div><b>Transaction reference matched</b><br><small>TXN-TS-48291 • 22 min ago</small></div></div><div class="audit"><div class="dot">!</div><div><b>Duplicate media detected</b><br><small>Medical Aid Drive • 1 hr ago</small></div></div></div>
+</section>
+
+<section id="campaigns" class="page">
+<div class="panel"><div style="display:flex;justify-content:space-between;align-items:center"><div><h2>Campaign Management</h2><small>Campaign-level evidence and verification status</small></div><button class="btn primary" onclick="go('create',document.querySelectorAll('.nav button')[2])">＋ New Campaign</button></div>
+<div class="tabs" style="margin-top:18px"><button class="tab on">All 10</button><button class="tab">Verified 8</button><button class="tab">Medium Risk 1</button><button class="tab">Review 1</button></div>
+<table id="campaignTable"><thead><tr><th>Campaign</th><th>Amount</th><th>Evidence</th><th>Risk</th><th>Status</th><th>Action</th></tr></thead><tbody>
+<tr><td><b>Community Food Drive</b><br><small>Hyderabad • 07 Aug</small></td><td>₹50,000</td><td>92/100</td><td><span class="badge verified">LOW</span></td><td>Verified</td><td><button class="btn secondary" onclick="showModal('Community Food Drive','92','LOW RISK')">View</button></td></tr>
+<tr><td><b>School Supply Support</b><br><small>Local project • 22 Jul</small></td><td>₹25,000</td><td>95/100</td><td><span class="badge verified">LOW</span></td><td>Verified</td><td><button class="btn secondary" onclick="showModal('School Supply Support','95','LOW RISK')">View</button></td></tr>
+<tr><td><b>Medical Aid Drive</b><br><small>Community clinic • 18 Jul</small></td><td>₹50,000</td><td>67/100</td><td><span class="badge medium">MEDIUM</span></td><td>Extra Check</td><td><button class="btn secondary" onclick="go('verify',document.querySelectorAll('.nav button')[4])">Review</button></td></tr>
+<tr><td><b>Food Distribution</b><br><small>Community center • 02 Jul</small></td><td>₹50,000</td><td>88/100</td><td><span class="badge verified">LOW</span></td><td>Verified</td><td><button class="btn secondary" onclick="showModal('Food Distribution','88','LOW RISK')">View</button></td></tr>
+</tbody></table></div></section>
+
+<section id="create" class="page">
+<div class="panel"><div class="timeline"><div class="t done">Campaign</div><div class="t">Evidence</div><div class="t">Verification</div><div class="t">Score</div></div><h2>Create Donation Drive</h2><div class="formgrid">
+<div class="field"><label>Campaign purpose<input id="purpose" placeholder="e.g. Community food distribution"></label></div>
+<div class="field"><label>Target amount (₹)<input id="amount" type="number" placeholder="50000"></label></div>
+<div class="field"><label>Project location<input id="location" placeholder="City / project site"></label></div>
+<div class="field"><label>Timeline<input id="timeline" placeholder="07 Sep – 20 Sep 2026"></label></div>
+<div class="field full"><label>Expected outcome<textarea id="outcome" placeholder="Describe measurable intended outcome"></textarea></label></div>
+<div class="field full"><label>Evidence capture</label><div class="drop" onclick="toast('File picker simulated — add your real upload integration here.')"><strong>＋ Drop photos, videos, bills or receipts</strong>GPS + server timestamp will be captured with evidence.</div></div>
+<div class="full"><button class="btn primary" onclick="createCampaign()">Create Drive & Continue</button> <button class="btn secondary" onclick="go('dashboard',document.querySelector('.nav button'))">Cancel</button></div>
+</div></div></section>
+
+<section id="projectDetailsNgo" class="page">
+<div class="panel project-page-panel">
+  <div class="project-page-head">
+    <div><div class="badge verified" style="display:inline-block;margin-bottom:8px">PROJECT TRANSPARENCY</div><h2 style="margin:0">Project Details</h2><small>View complete project information, funding, milestones, beneficiaries, GPS and evidence status.</small></div>
+    <div class="project-head-actions"><select id="ngoProjectDetailSelect" onchange="renderNgoProjectDetails()" style="min-width:240px;padding:11px;border:1px solid #dce3eb;border-radius:9px;background:#fff"></select></div>
+  </div>
+  <div id="ngoProjectDetailContent" style="margin-top:18px"></div>
+</div>
+</section>
+
+<section id="updates" class="page">
+<div class="grid">
+  <div class="panel">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+      <div><h2 style="margin:0">📢 Donor Updates</h2><small>Share verified progress, spending and milestone updates with donors.</small></div>
+      <span class="badge verified">TRANSPARENCY UPDATES</span>
+    </div>
+    <div class="formgrid" style="margin-top:18px">
+      <label>Project
+        <select id="updateProject" onchange="updateProjectPlaceholder()"></select>
+      </label>
+      <label>Update Type
+        <select id="updateType">
+          <option>Progress Update</option>
+          <option>Spending Update</option>
+          <option>Milestone Completed</option>
+          <option>Evidence Update</option>
+          <option>Project Announcement</option>
+        </select>
+      </label>
+      <label class="full">Headline
+        <input id="updateHeadline" placeholder="e.g. School water system installation completed">
+      </label>
+      <label class="full">Message
+        <textarea id="updateMessage" rows="5" placeholder="Tell donors what happened, what was completed, and what evidence supports this update."></textarea>
+      </label>
+      <label>Amount Spent (optional)
+        <input id="updateAmount" type="number" min="0" placeholder="40000">
+      </label>
+      <label>Evidence Reference (optional)
+        <input id="updateEvidenceRef" placeholder="EVD-ABC123">
+      </label>
+      <div class="full" style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn primary" onclick="publishDonorUpdate()">📢 Publish Update</button>
+        <button class="btn secondary" onclick="clearDonorUpdateForm()">Clear</button>
+      </div>
+    </div>
+    <div class="notice success" style="margin-top:15px"><b>What donors see:</b> project, update type, publication time, message, spending amount and linked evidence reference.</div>
+  </div>
+  <div class="panel">
+    <h2>Update Summary</h2>
+    <div id="updateSummary"></div>
+  </div>
+</div>
+<div class="panel" style="margin-top:18px">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+    <div><h2 style="margin:0">Published Updates</h2><small>Updates already shared with donors.</small></div>
+    <span class="badge verified" id="updateCountBadge">0 PUBLISHED</span>
+  </div>
+  <div id="donorUpdatesList" style="margin-top:14px"></div>
+</div>
+</section>
+
+<section id="funds" class="page">
+<div class="grid">
+  <div class="panel">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+      <div><h2 style="margin:0">💰 Fund Tracking</h2><small>Track project funds from money received to money spent and remaining balance.</small></div>
+      <span class="badge verified">FUND TRANSPARENCY</span>
+    </div>
+    <div class="formgrid" style="margin-top:18px">
+      <label>Project<select id="fundProject" onchange="renderFunds()"></select></label>
+      <label>Transaction Type<select id="fundType"><option>Funds Received</option><option>Expense</option></select></label>
+      <label>Description<input id="fundDescription" placeholder="e.g. Pipes purchased"></label>
+      <label>Amount (₹)<input id="fundAmount" type="number" min="1" placeholder="35000"></label>
+      <label>Reference / Bill No.<input id="fundReference" placeholder="INV-2026-001"></label>
+      <label>Date<input id="fundDate" type="date"></label>
+      <div class="full" style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn primary" onclick="addFundTransaction()">＋ Add Transaction</button>
+        <button class="btn secondary" onclick="clearFundForm()">Clear</button>
+      </div>
+    </div>
+  </div>
+  <div class="panel"><h2>Fund Summary</h2><div id="fundSummary"></div></div>
+</div>
+<div class="panel" style="margin-top:18px">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><div><h2 style="margin:0">Transaction History</h2><small>Every receipt and expense is recorded against the selected project.</small></div><span class="badge verified" id="fundCountBadge">0 RECORDS</span></div>
+  <div id="fundTransactions" style="margin-top:14px"></div>
+</div>
+</section>
+
+<section id="evidence" class="page"><div class="grid"><div class="panel"><h2>📍 Mobile Evidence Capture</h2><p class="muted">Capture evidence directly from a phone camera and attach the current GPS location and capture time.</p><label>Project<select id="evidenceProject" onchange="refreshEvidence()"></select></label><div class="gpsbox" style="margin-top:14px"><div class="gpsrow"><button class="btn primary" onclick="getCurrentGPS()">📍 Use Current GPS</button><button class="btn secondary" onclick="openMapForGPS()">🗺 Open Map</button></div><div id="gpsStatus" class="gpsdata" style="margin-top:9px">Location not captured yet.</div><a id="gpsMapLink" class="maplink" href="#" target="_blank" style="display:none">View captured location on map ↗</a></div><div style="margin-top:14px"><input id="evidencePhoto" class="capture-input" type="file" accept="image/*" capture="environment" onchange="captureEvidenceFile(this,'photo')"><label for="evidencePhoto" class="btn primary capture-btn">📷 Capture Photo</label><input id="evidenceVideo" class="capture-input" type="file" accept="video/*" capture="environment" onchange="captureEvidenceFile(this,'video')"><label for="evidenceVideo" class="btn secondary capture-btn">🎥 Record Video</label><input id="evidenceDoc" class="capture-input" type="file" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx" onchange="captureEvidenceFile(this,'document')"><label for="evidenceDoc" class="btn secondary capture-btn">🧾 Add Bill / Receipt</label></div><div class="notice" style="margin-top:14px"><b>Integrity record</b><br>Each capture stores the project, file type, GPS coordinates (when permission is granted), device capture time, and a unique evidence ID.</div></div><div class="panel"><h2>Evidence Summary</h2><div id="evidenceSummary"></div></div></div><div class="panel" style="margin-top:18px"><h2>Evidence Timeline</h2><div id="ngoEvidenceTimeline"></div></div></section>
+
+<section id="org" class="page">
+<div class="hero"><div><h2>🏢 Organization Profile</h2><p>Manage the public identity, contact information and verification details of your NGO.</p></div><span class="badge verified">VERIFIED ORGANIZATION</span></div>
+<div class="grid">
+<div class="panel"><h2>Organization Information</h2><div class="formgrid" style="margin-top:14px">
+<label>Organization Name<input id="orgName" value="Tensor NGO" placeholder="Enter organization name"></label>
+<label>Registration / NGO ID<input id="orgReg" value="NGO-2026-001" placeholder="Registration number"></label>
+<label>Organization Type<select id="orgType"><option>Non-Profit Organization</option><option>Charitable Trust</option><option>Society</option><option>Section 8 Company</option></select></label>
+<label>Year Established<input id="orgYear" type="number" value="2018" min="1800" max="2026"></label>
+<label class="full">About Organization<textarea id="orgAbout" placeholder="Describe your mission and work...">Working to improve access to clean water, education and essential community infrastructure.</textarea></label>
+<label>Website<input id="orgWebsite" placeholder="https://example.org"></label>
+<label>Primary Contact<input id="orgContact" value="NGO Administrator" placeholder="Contact person"></label>
+<label>Phone<input id="orgPhone" placeholder="Contact number"></label>
+<label>Email<input id="orgEmail" placeholder="official@email.org"></label>
+<label class="full">Registered Address<textarea id="orgAddress" placeholder="Registered office address"></textarea></label>
+<div class="full"><button class="btn primary" onclick="saveOrgProfile()">💾 Save Organization Profile</button></div>
+</div></div>
+<div class="panel"><h2>Verification Status</h2><div class="row"><span>Organization identity</span><b class="green">✓ Verified</b></div><div class="row"><span>Registration details</span><b class="green">✓ Submitted</b></div><div class="row"><span>Contact information</span><b class="yellow">⚠ Review pending</b></div><div class="notice success" style="margin-top:15px"><b>TrustScore profile</b><br>Your organization profile is linked to projects, evidence, fund transactions and the explainable trust score.</div></div>
+</div></section>
+
+<section id="verify" class="page">
+<div class="grid"><div class="panel"><h2>Automated Verification Engine</h2>
+<div class="row"><span>GPS + location consistency</span><b class="green">✓ 20/20</b></div><div class="row"><span>Server timestamp / capture integrity</span><b class="green">✓ 15/15</b></div><div class="row"><span>Financial verification</span><b class="yellow">⚠ 18/30</b></div><div class="row"><span>Media authenticity / duplicate detection</span><b class="yellow">⚠ 10/15</b></div><div class="row"><span>Project progress</span><b class="green">✓ 10/10</b></div><div class="row"><span>Delivery / recipient evidence</span><b class="green">✓ 10/10</b></div>
+<div class="notice" style="margin-top:15px"><b>Why flagged?</b><br>One image is near-duplicate and an invoice amount does not fully match the recorded supplier transaction.</div></div>
+<div class="panel"><h2>Verification Decision</h2><div class="score-ring"><strong>83</strong><small>Evidence Score</small></div><div class="riskbox"><b class="medium">MEDIUM</b><span><b>Extra check required</b><br><small>Risk-based human review</small></span></div><button class="btn primary" style="width:100%;margin-top:15px" onclick="toast('Audit task assigned to authorized reviewer.')">Assign Authorized Review</button><button class="btn secondary" style="width:100%;margin-top:8px" onclick="toast('Evidence request sent to NGO.')">Request More Evidence</button></div></div>
+</section>
+
+<section id="score" class="page">
+<div class="hero"><div><h2>Explainable NGO Trust Score</h2><p>Weighted by Evidence Score and completed donation amount.</p></div><div class="hero-score"><strong>91</strong><small>TRUST SCORE / 100</small></div></div>
+<div class="grid3"><div class="panel"><h3>Campaign Performance</h3><div class="row"><span>₹1,00,000 drive</span><b>92</b></div><div class="row"><span>₹50,000 drive</span><b>85</b></div><div class="row"><span>₹25,000 drive</span><b>95</b></div></div>
+<div class="panel"><h3>Evidence Quality</h3><div class="row"><span>Financial verification</span><b>28/30</b></div><div class="row"><span>Location consistency</span><b>19/20</b></div><div class="row"><span>Media authenticity</span><b>14/15</b></div><div class="row"><span>Project progress</span><b>10/10</b></div></div>
+<div class="panel"><h3>Trust Signals</h3><div class="row"><span>Verified utilization</span><b class="green">Strong</b></div><div class="row"><span>Risk history</span><b class="yellow">Moderate</b></div><div class="row"><span>Evidence coverage</span><b class="green">94%</b></div><div class="row"><span>Audit readiness</span><b class="green">Ready</b></div></div></div>
+<div class="panel" style="margin-top:18px"><h2>How the score is explained</h2><p style="font-size:13px;line-height:1.7;color:#59677a">Every campaign contributes an Evidence Score. Completed donation amounts weight the historical performance so donors can see a campaign-level trail instead of relying only on reviews or testimonials.</p><div class="notice success"><b>Transparent by design</b><br>Donors can inspect the evidence and verification status behind the score.</div></div>
+</section>
+
+
+<section id="settings" class="page">
+<div class="settings-grid">
+<div class="settings-menu">
+<button class="on" onclick="settingsTab('account',this)">👤 Account & Profile</button>
+<button onclick="settingsTab('security',this)">🔐 Security</button>
+<button onclick="settingsTab('notifications',this)">🔔 Notifications</button>
+<button onclick="settingsTab('verification',this)">✓ Verification Rules</button>
+<button onclick="settingsTab('scoring',this)">★ Scoring Configuration</button>
+<button onclick="settingsTab('privacy',this)">🛡 Privacy & Access</button>
+<button onclick="settingsTab('integrations',this)">🔗 Integrations</button>
+</div>
+<div>
+<div id="account" class="setting-pane active panel"><h2>Account & Profile</h2>
+<div class="setting-row"><div><strong>Organization</strong><small id="setOrg">Tensor NGO</small></div><button class="btn secondary" onclick="toast('Profile editor opened.')">Edit</button></div>
+<div class="setting-row"><div><strong>Authorized email</strong><small id="setEmail">Not connected</small></div><span class="badge verified">VERIFIED</span></div>
+<div class="setting-row"><div><strong>Account type</strong><small>NGO / Charity organization</small></div><span>Administrator</span></div>
+<div class="setting-row"><div><strong>Profile completeness</strong><small>Registration, contact and verification details</small></div><b class="green">86%</b></div>
+<button class="btn primary" onclick="toast('Profile changes saved.')">Save Profile</button></div>
+
+<div id="security" class="setting-pane panel"><h2>Security</h2>
+<div class="setting-row"><div><strong>Two-factor authentication</strong><small>Require an additional verification step for account access.</small></div><div class="toggle" onclick="toggleSetting(this)"></div></div>
+<div class="setting-row"><div><strong>Login alerts</strong><small>Notify administrators when a new login is detected.</small></div><div class="toggle on" onclick="toggleSetting(this)"></div></div>
+<div class="setting-row"><div><strong>Session timeout</strong><small>Automatically sign out inactive sessions.</small></div><select style="width:150px;padding:8px;border:1px solid #d9e0e7;border-radius:8px"><option>30 minutes</option><option>1 hour</option><option>4 hours</option></select></div>
+<div class="setting-row"><div><strong>Change password</strong><small>Update the password associated with this account.</small></div><button class="btn secondary" onclick="toast('Password change flow opened.')">Change</button></div>
+</div>
+
+<div id="notifications" class="setting-pane panel"><h2>Notifications</h2>
+<div class="setting-row"><div><strong>Risk flags</strong><small>Notify when evidence is inconsistent or suspicious.</small></div><div class="toggle on" onclick="toggleSetting(this)"></div></div>
+<div class="setting-row"><div><strong>Verification completed</strong><small>Receive updates when a campaign passes verification.</small></div><div class="toggle on" onclick="toggleSetting(this)"></div></div>
+<div class="setting-row"><div><strong>Evidence requests</strong><small>Alert the NGO when additional evidence is requested.</small></div><div class="toggle on" onclick="toggleSetting(this)"></div></div>
+<div class="setting-row"><div><strong>Weekly trust report</strong><small>Summary of trust score, campaigns and risk signals.</small></div><div class="toggle" onclick="toggleSetting(this)"></div></div>
+</div>
+
+<div id="verification" class="setting-pane panel"><h2>Verification Rules</h2>
+<div class="notice success">Automated-first verification is enabled. Suspicious cases can be escalated for authorized human review.</div>
+<div class="setting-row"><div><strong>GPS consistency</strong><small>Compare evidence location with campaign/project location and timing.</small></div><b>20 pts</b></div>
+<div class="setting-row"><div><strong>Server timestamp / capture integrity</strong><small>Check capture timing and evidence integrity.</small></div><b>15 pts</b></div>
+<div class="setting-row"><div><strong>Financial verification</strong><small>Match invoice, supplier, amount, date and transaction reference.</small></div><b>30 pts</b></div>
+<div class="setting-row"><div><strong>Media authenticity</strong><small>Detect duplicate or near-duplicate media.</small></div><b>15 pts</b></div>
+<div class="setting-row"><div><strong>Project progress</strong><small>Compare dated evidence against expected progress.</small></div><b>10 pts</b></div>
+<div class="setting-row"><div><strong>Delivery / recipient / external evidence</strong><small>Verify outcome and delivery signals.</small></div><b>10 pts</b></div>
+</div>
+
+<div id="scoring" class="setting-pane panel"><h2>Scoring Configuration</h2>
+<p style="font-size:12px;color:#728096">Prototype methodology aligned to the supplied SIH concept. Weights total 100 points.</p>
+<div class="setting-row"><div><strong>Evidence Score</strong><small>Campaign-level score from verification signals.</small></div><b>0–100</b></div>
+<div class="setting-row"><div><strong>NGO Trust Score</strong><small>Historical evidence performance weighted by completed donation amount.</small></div><b>Weighted</b></div>
+<div class="setting-row"><div><strong>Low risk threshold</strong><small>Routine cases can be automatically verified.</small></div><select style="width:100px;padding:8px;border:1px solid #d9e0e7;border-radius:8px"><option>80+</option><option>85+</option><option>90+</option></select></div>
+<div class="setting-row"><div><strong>Medium risk threshold</strong><small>Requires additional checks.</small></div><select style="width:100px;padding:8px;border:1px solid #d9e0e7;border-radius:8px"><option>60–79</option><option>65–79</option></select></div>
+<div class="setting-row"><div><strong>High risk action</strong><small>Escalate suspicious evidence to authorized review.</small></div><span class="badge high">AUDIT</span></div>
+<button class="btn primary" onclick="toast('Scoring configuration saved.')">Save Scoring Rules</button>
+</div>
+
+<div id="privacy" class="setting-pane panel"><h2>Privacy & Access Control</h2>
+<div class="setting-row"><div><strong>Minimum data collection</strong><small>Only collect evidence required for verification.</small></div><div class="toggle on" onclick="toggleSetting(this)"></div></div>
+<div class="setting-row"><div><strong>Sensitive evidence access</strong><small>Restrict invoices and sensitive records to authorized reviewers.</small></div><div class="toggle on" onclick="toggleSetting(this)"></div></div>
+<div class="setting-row"><div><strong>Public campaign profile</strong><small>Expose campaign status, score and verification trail to donors.</small></div><div class="toggle on" onclick="toggleSetting(this)"></div></div>
+<div class="setting-row"><div><strong>Audit log retention</strong><small>Keep verification actions available for authorized audit review.</small></div><select style="width:150px;padding:8px;border:1px solid #d9e0e7;border-radius:8px"><option>12 months</option><option>24 months</option><option>36 months</option></select></div>
+</div>
+
+<div id="integrations" class="setting-pane panel"><h2>Integrations</h2>
+<div class="setting-row"><div><strong>Banking / transaction data</strong><small>Connect transaction references for financial consistency checks.</small></div><button class="btn secondary" onclick="toast('Banking integration setup opened.')">Connect</button></div>
+<div class="setting-row"><div><strong>Maps / GPS service</strong><small>Validate location consistency for evidence captures.</small></div><button class="btn secondary" onclick="toast('Maps integration setup opened.')">Connect</button></div>
+<div class="setting-row"><div><strong>Supplier verification</strong><small>Match supplier, invoice, amount and date.</small></div><button class="btn secondary" onclick="toast('Supplier integration setup opened.')">Connect</button></div>
+<div class="setting-row"><div><strong>Storage</strong><small>Evidence media and documents storage provider.</small></div><span class="badge verified">READY</span></div>
+</div>
+</div></div>
+</section>
+
+<section id="donor" class="page">
+<div class="panel" style="max-width:900px;margin:auto"><div style="display:flex;justify-content:space-between;gap:20px;align-items:start"><div><span class="badge verified">✓ VERIFIED CAMPAIGN</span><h2 style="font-size:24px;margin-top:12px">Community Food Drive</h2><p>Providing food support to the intended community.</p></div><div class="score-ring" style="width:110px;height:110px;border-width:9px;outline-width:4px;margin:0"><strong style="font-size:30px">92</strong><small>Evidence</small></div></div>
+<div class="grid3"><div class="card"><div class="label">Target</div><div class="value">₹50K</div></div><div class="card"><div class="label">Utilized</div><div class="value">₹47.5K</div></div><div class="card"><div class="label">NGO Trust</div><div class="value green">91/100</div></div></div>
+<h3 style="margin-top:24px">Verification trail</h3><div class="row"><span>📍 Location consistency</span><b class="green">Verified</b></div><div class="row"><span>🕒 Server timestamp</span><b class="green">Verified</b></div><div class="row"><span>📷 Media authenticity</span><b class="green">Verified</b></div><div class="row"><span>🧾 Financial evidence</span><b class="green">Verified</b></div><div class="row"><span>📦 Project progress & delivery</span><b class="green">Verified</b></div>
+<div class="notice success" style="margin-top:18px"><b>Donate with confidence.</b><br>This page presents the campaign's evidence-backed verification status and explains the trust signals.</div>
+<button class="btn primary" style="margin-top:15px" onclick="go('donate', [...document.querySelectorAll('.nav button')].find(b=>(b.textContent||'').includes('Donate')))">Donate to this Campaign</button>
+</div></section>
+
+<section id="donate" class="page">
+<div class="panel" style="max-width:900px;margin:auto">
+<div style="display:flex;justify-content:space-between;gap:20px;align-items:start;flex-wrap:wrap">
+<div><span class="badge verified">✓ VERIFIED CAMPAIGN</span><h2 style="font-size:24px;margin-top:12px">Donate to Community Food Drive</h2><p>Your donation is linked to the campaign and its evidence trail.</p></div>
+<div class="score-ring" style="width:100px;height:100px;border-width:8px;outline-width:4px;margin:0"><strong style="font-size:28px">92</strong><small>Evidence</small></div>
+</div>
+<div class="grid3" style="margin-top:18px"><div class="card"><div class="label">Target</div><div class="value">₹50K</div></div><div class="card"><div class="label">Raised</div><div class="value">₹38.5K</div></div><div class="card"><div class="label">Remaining</div><div class="value">₹11.5K</div></div></div>
+<div class="notice success" style="margin-top:18px"><b>Evidence-backed campaign</b><br>Location, timestamp, media and financial verification signals are available before you donate.</div>
+<div class="formgrid" style="margin-top:20px">
+<div class="field"><label>Donation amount (₹)<input id="donationAmount" type="number" min="10" step="10" value="500" placeholder="Enter amount"></label></div>
+<div class="field"><label>Payment method<select id="paymentMethod"><option>UPI</option><option>Debit / Credit Card</option><option>Net Banking</option></select></label></div>
+<div class="field full"><label>Donor message (optional)<textarea id="donorMessage" rows="3" placeholder="Add a message for the NGO"></textarea></label></div>
+<div class="full" style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn primary" onclick="processDonation()">💳 Continue to Payment</button><button class="btn secondary" onclick="go('donor',document.querySelectorAll('.nav button')[10])">← Back to Campaign</button></div>
+</div>
+<div id="donationResult" style="margin-top:18px"></div>
+</div></section>
+</main></div>
+
+<section id="donorDashboard" class="page">
+<div class="hero"><div><h2>Donor Dashboard</h2><p>Discover projects and follow your donation impact.</p></div><div class="hero-score"><strong>₹5,000</strong><small>TOTAL DONATED</small></div></div>
+<div class="cards"><div class="card"><div class="label">Total Donated</div><div class="value">₹5,000</div></div><div class="card"><div class="label">Active Donations</div><div class="value">2</div></div><div class="card"><div class="label">Projects Supported</div><div class="value">3</div></div><div class="card"><div class="label">Impact Updates</div><div class="value">6</div></div></div>
+<div class="panel"><h2>Latest Impact</h2><div class="notice success">📸 New evidence uploaded for <b>School Water System</b> — installation milestone completed.</div></div></section>
+
+<section id="explore" class="page"><div class="panel"><h2>Explore NGOs / Projects</h2><p>Discover evidence-backed campaigns before donating.</p><table><thead><tr><th>NGO</th><th>Project</th><th>Location</th><th>Goal</th><th>Raised</th><th>Status</th></tr></thead><tbody><tr><td>Hope Foundation</td><td>School Water System</td><td>Pune</td><td>₹1,00,000</td><td>₹72,000</td><td><span class="badge verified">✓ VERIFIED</span></td></tr><tr><td>Care Community</td><td>Community Food Drive</td><td>Mumbai</td><td>₹75,000</td><td>₹51,500</td><td><span class="badge verified">✓ VERIFIED</span></td></tr></tbody></table><button class="btn primary" onclick="go('project',this)">View Project Details</button></div></section>
+
+<section id="project" class="page"><div class="hero"><div><span class="badge verified">✓ VERIFIED PROJECT</span><h2>Build a School Water System</h2><p>Provide a reliable water system for students and staff.</p></div><div class="hero-score"><strong>76%</strong><small>PROGRESS</small></div></div><div class="grid"><div class="panel"><h2>Project Overview</h2><p><b>Problem:</b> Students lack reliable access to safe drinking water.</p><p><b>Goal:</b> Install a complete school water system.</p><p><b>Beneficiaries:</b> 420 students and 28 staff.</p><p><b>Timeline:</b> 1 Aug – 30 Sep 2026</p></div><div class="panel"><h2>Budget Breakdown</h2><div class="row"><span>Pipes & materials</span><b>₹35,000</b></div><div class="row"><span>Labour</span><b>₹40,000</b></div><div class="row"><span>Filtration system</span><b>₹20,000</b></div><div class="row"><span>Other</span><b>₹5,000</b></div></div></div><div class="panel"><h2>🔍 Evidence Timeline</h2><div class="timeline"><div class="t done">💰 ₹1,00,000 received</div><div class="t done">📋 Budget approved</div><div class="t done">🧾 ₹35,000 — Pipes purchased</div><div class="t done">📸 Installation started</div><div class="t done">🧾 ₹40,000 — Labour payment</div><div class="t done">📸 Installation completed</div><div class="t done">✅ Independent verification</div><div class="t">💧 Water system operational</div></div><div class="notice success">Click each milestone in the full system to inspect its supporting evidence, date, location and verification status.</div><button class="btn primary" onclick="go('donate',this)">Donate to this Project</button></div></section>
+
+<section id="donations" class="page"><div class="panel"><h2>My Donations</h2><table><thead><tr><th>Date</th><th>NGO / Project</th><th>Amount</th><th>Transaction ID</th><th>Receipt</th></tr></thead><tbody><tr><td>08 Sep 2026</td><td>Hope Foundation / School Water System</td><td>₹5,000</td><td>DON-DEMO-001</td><td><button class="btn secondary" onclick="toast('Donation receipt opened in prototype.')">View Receipt</button></td></tr></tbody></table></div></section>
+
+<section id="impact" class="page"><div class="panel"><h2>Track My Impact</h2><div class="hero-score" style="float:right"><strong>84%</strong><small>PROJECT PROGRESS</small></div><h3>₹5,000 donated → ₹4,200 spent</h3><p>Funds are linked to project spending and evidence updates.</p><div class="row"><span>🧾 Pipes purchased</span><b class="green">Completed</b></div><div class="row"><span>📸 Installation</span><b class="green">Completed</b></div><div class="row"><span>💧 Water system</span><b class="yellow">In progress</b></div><h3 style="margin-top:22px">Evidence uploaded by NGO</h3><p>📷 6 photos • 🧾 3 invoices • 📍 Location matched • 🕒 Timestamp verified</p></div></section>
+
+<section id="notifications" class="page"><div class="panel"><h2>Notifications</h2><div class="row"><span>📸 New evidence uploaded</span><small>Today</small></div><div class="row"><span>✅ Project milestone completed</span><small>Yesterday</small></div><div class="row"><span>🧾 Spending update received</span><small>2 days ago</small></div><div class="row"><span>💧 Project completion target updated</span><small>4 days ago</small></div></div></section>
+
+
+
+<section id="projects" class="page"><div class="panel project-page-panel">
+<div class="project-page-head"><div><div class="badge verified" style="display:inline-block;margin-bottom:8px">NGO PROJECT MANAGEMENT</div><h2 style="margin:0">Projects</h2><small>Create, edit, fund-track and attach evidence — everything is managed from this page.</small></div><div class="project-head-actions"><button class="btn primary" onclick="newProject()">＋ Create New Project</button><button class="btn secondary" onclick="go('evidence',document.querySelector('#ngoNav button[onclick*=\"evidence\"]'))">📷 Add Evidence</button></div></div>
+<div class="workflow-strip"><span>1. Create Project</span><b>→</b><span>2. Track Funds</span><b>→</b><span>3. Add GPS Evidence</span><b>→</b><span>4. Verify</span></div>
+<div id="inlineProjectEditor" class="inline-project-editor" style="display:none">
+  <div class="project-editor-head"><div><h3 id="inlineManagementTitle" style="margin:0">Create Project</h3><p class="muted" style="margin:4px 0 0">Fill the project details here. The editor stays at the top for quick editing.</p></div><div class="project-head-actions"><button class="btn secondary" onclick="closeInlineProjectEditor()">Cancel</button><button class="btn primary" onclick="saveInlineProject()">💾 Save Project</button></div></div>
+  <div class="formgrid">
+    <label>Project Title<input id="ipTitle" placeholder="e.g. Build a School Water System"></label>
+    <label>Target Amount (₹)<input id="ipTarget" type="number" min="1" placeholder="100000"></label>
+    <label class="full">Description<textarea id="ipDescription" placeholder="Describe the problem and solution..."></textarea></label>
+    <label>Location<input id="ipLocation" placeholder="Project site / city"></label>
+    <label>Timeline<input id="ipTimeline" placeholder="01 Sep – 30 Sep 2026"></label>
+    <label>Beneficiaries<input id="ipBeneficiaries" placeholder="420 students"></label>
+    <label>Progress (%)<input id="ipProgress" type="number" min="0" max="100" value="0"></label>
+    <label class="full">Budget Breakdown<textarea id="ipBudget" placeholder="Pipes: ₹35,000; Labour: ₹40,000; Filtration: ₹20,000"></textarea></label>
+    <label class="full">Milestones<textarea id="ipMilestones" placeholder="Budget approved; materials purchased; installation; verification; operational handover."></textarea></label>
+  </div>
+</div>
+<div class="projects-list-head"><div><h3 style="margin:0">Your Projects</h3><span class="mini muted">All project information and actions stay here — no duplicate Project Management page.</span></div><button class="btn primary" onclick="newProject()">＋ Add Project</button></div>
+<div id="projectList"></div></div></section>
+
+<section id="management" class="page" aria-hidden="true" style="display:none!important"><div class="panel project-management-panel"><div class="project-editor-head"><div><h2 id="managementTitle" style="margin:0">Project Management</h2><p class="muted" style="margin:4px 0 0">Create or edit project details. Changes are saved instantly in this prototype.</p></div><div class="project-head-actions"><button class="btn secondary" onclick="go('projects',document.querySelector('#ngoNav button[onclick*=\"projects\"]'))">← Back to Projects</button><button class="btn primary" onclick="saveProject()">💾 Save Project</button></div></div><div class="formgrid"><label>Project Title<input id="pmTitle" placeholder="e.g. Build a School Water System"></label><label>Target Amount (₹)<input id="pmTarget" type="number" min="1" placeholder="100000"></label><label class="full">Description<textarea id="pmDescription" placeholder="Describe the problem and solution..."></textarea></label><label>Location<input id="pmLocation" placeholder="Project site / city"></label><label>Timeline<input id="pmTimeline" placeholder="01 Sep – 30 Sep 2026"></label><label>Beneficiaries<input id="pmBeneficiaries" placeholder="420 students"></label><label>Progress (%)<input id="pmProgress" type="number" min="0" max="100" value="0"></label><label class="full">Budget Breakdown<textarea id="pmBudget" placeholder="Pipes: ₹35,000; Labour: ₹40,000; Filtration: ₹20,000"></textarea></label><label class="full">Milestones<textarea id="pmMilestones" placeholder="Budget approved; materials purchased; installation; verification; operational handover."></textarea></label><div class="full editor-note"><span>✓ All important project details are editable above.</span><button class="btn primary" onclick="saveProject()">💾 Save Changes</button></div></div></div></section>
+
+
+
+
+
+<div class="modal" id="modal"><div class="modalbox"><h2 id="mTitle"></h2><div class="score-ring"><strong id="mScore">92</strong><small>Evidence</small></div><p id="mRisk"></p><button class="btn primary" onclick="closeModal()">Close</button></div></div>
+<div class="toast" id="toast"></div>
+<script>
+const titles={dashboard:'NGO Dashboard',projects:'Projects',management:'Project Management',updates:'Donor Updates',funds:'Fund Tracking',evidence:'Evidence Upload',verify:'Verification',score:'Explainable Trust Score',donorDashboard:'Donor Dashboard',explore:'Explore NGOs / Projects',project:'Project Details & Evidence Timeline',projectDetailsNgo:'Project Details',donations:'My Donations',impact:'Track My Impact',notifications:'Notifications',donate:'Donate',settings:'Profile / Settings',campaigns:'Campaign Management',create:'Create Donation Drive'};
+function saveOrgProfile(){const fields=['orgName','orgReg','orgType','orgYear','orgAbout','orgWebsite','orgContact','orgPhone','orgEmail','orgAddress'];const data={};fields.forEach(id=>{const e=document.getElementById(id);if(e)data[id]=e.value});localStorage.setItem('trustscore_org_profile',JSON.stringify(data));toast('Organization profile saved successfully.');}
+function loadOrgProfile(){try{const d=JSON.parse(localStorage.getItem('trustscore_org_profile')||'null');if(!d)return;Object.keys(d).forEach(id=>{const e=document.getElementById(id);if(e)e.value=d[id]})}catch(e){}}
+function go(id,btn){
+ const role=localStorage.getItem('trustscore_role')||'ngo';
+ const current=JSON.parse(localStorage.getItem('trustscore_current_user')||'null');
+ const ngoPages=['dashboard','projectDetailsNgo','updates','funds','evidence','verify','score','settings'];
+ const donorPages=['donate','impact','settings'];
+ if(current && current.role==='ngo' && !ngoPages.includes(id)){toast('Access denied — Donor page.');return;}
+ if(current && current.role==='donor' && !donorPages.includes(id)){toast('Access denied — NGO management page.');return;}
+ document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+ const page=document.getElementById(id); if(!page){toast('Page unavailable.');return;} page.classList.add('active');
+ document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));if(btn)btn.classList.add('active');
+ document.getElementById('title').textContent=titles[id]||id;if(id==='dashboard'){renderProjectOverview();}if(id==='org'){loadOrgProfile();}if(id==='projectDetailsNgo'){populateNgoProjectDetails();}if(id==='updates'){populateUpdateProjects();renderDonorUpdates();}if(id==='funds'){populateFundProjects();renderFunds();}if(id==='projects'){renderProjects();openFirstProjectEditor();}if(id==='evidence'){populateEvidenceProjects(document.getElementById('evidenceProject')?.value);refreshEvidence()}window.scrollTo({top:0,behavior:'smooth'})
+}
+function toast(msg){let t=document.getElementById('toast');t.textContent=msg;t.style.display='block';clearTimeout(window._t);window._t=setTimeout(()=>t.style.display='none',2600)}
+function showModal(title,score,risk){document.getElementById('mTitle').textContent=title;document.getElementById('mScore').textContent=score;document.getElementById('mRisk').textContent='Verification result: '+risk+'. Evidence is available in the campaign evidence trail.';document.getElementById('modal').style.display='flex'}
+function closeModal(){document.getElementById('modal').style.display='none'}
+function getProjects(){try{return JSON.parse(localStorage.getItem('trustscore_projects')||'[]')}catch(e){return[]}}
+function saveProjects(a){localStorage.setItem('trustscore_projects',JSON.stringify(a))}
+function projectId(){return 'PRJ-'+Date.now().toString(36).toUpperCase()}
+function openInlineProjectEditor(mode,id){
+ const box=document.getElementById('inlineProjectEditor'); if(!box)return;
+ box.style.display='block'; box.dataset.editId=id||'';
+ document.getElementById('inlineManagementTitle').textContent=mode==='edit'?'Edit Project':'Create Project';
+ window.scrollTo({top:0,behavior:'smooth'});
+}
+function closeInlineProjectEditor(){const box=document.getElementById('inlineProjectEditor');if(box)box.style.display='none'}
+function clearInlineProjectForm(){['ipTitle','ipDescription','ipLocation','ipTimeline','ipBeneficiaries','ipBudget','ipMilestones'].forEach(id=>document.getElementById(id).value='');document.getElementById('ipTarget').value='';document.getElementById('ipProgress').value='0'}
+function newProject(){clearInlineProjectForm();openInlineProjectEditor('new','')}
+function openFirstProjectEditor(){const a=getProjects();if(a.length){editProject(a[0].id)}else{newProject()}}
+function editProject(id){
+ const p=getProjects().find(x=>x.id===id);if(!p)return;
+ document.getElementById('ipTitle').value=p.title||'';document.getElementById('ipTarget').value=p.target||'';document.getElementById('ipDescription').value=p.description||'';document.getElementById('ipLocation').value=p.location||'';document.getElementById('ipTimeline').value=p.timeline||'';document.getElementById('ipBeneficiaries').value=p.beneficiaries||'';document.getElementById('ipProgress').value=p.progress||0;document.getElementById('ipBudget').value=p.budget||'';document.getElementById('ipMilestones').value=p.milestones||'';
+ openInlineProjectEditor('edit',id);
+}
+function saveInlineProject(){
+ const title=document.getElementById('ipTitle').value.trim(),target=Number(document.getElementById('ipTarget').value),location=document.getElementById('ipLocation').value.trim();
+ if(!title||!target||!location){toast('Project title, target amount and location are required.');return}
+ const box=document.getElementById('inlineProjectEditor'),a=getProjects(),id=box.dataset.editId||projectId(),old=a.find(x=>x.id===id);
+ const p={id,title,target,description:document.getElementById('ipDescription').value.trim(),location,timeline:document.getElementById('ipTimeline').value.trim(),beneficiaries:document.getElementById('ipBeneficiaries').value.trim(),progress:Math.max(0,Math.min(100,Number(document.getElementById('ipProgress').value)||0)),budget:document.getElementById('ipBudget').value.trim(),milestones:document.getElementById('ipMilestones').value.trim(),raised:old?.raised||0,status:old?.status||'ACTIVE',created:old?.created||new Date().toISOString(),updated:new Date().toISOString()};
+ const i=a.findIndex(x=>x.id===id);if(i>=0)a[i]=p;else a.unshift(p);saveProjects(a);renderProjects();populateEvidenceProjects();closeInlineProjectEditor();toast(old?'Project updated successfully.':'Project created successfully.');
+}
+function saveProject(){
+ const title=document.getElementById('pmTitle').value.trim(),target=Number(document.getElementById('pmTarget').value),location=document.getElementById('pmLocation').value.trim();
+ if(!title||!target||!location){toast('Project title, target amount and location are required.');return}
+ const a=getProjects(),id=document.getElementById('management').dataset.editId||projectId(),old=a.find(x=>x.id===id);
+ const p={id,title,target,description:document.getElementById('pmDescription').value.trim(),location,timeline:document.getElementById('pmTimeline').value.trim(),beneficiaries:document.getElementById('pmBeneficiaries').value.trim(),progress:Math.max(0,Math.min(100,Number(document.getElementById('pmProgress').value)||0)),budget:document.getElementById('pmBudget').value.trim(),milestones:document.getElementById('pmMilestones').value.trim(),raised:old?.raised||0,status:old?.status||'ACTIVE',created:old?.created||new Date().toISOString(),updated:new Date().toISOString()};
+ const i=a.findIndex(x=>x.id===id);if(i>=0)a[i]=p;else a.unshift(p);saveProjects(a);renderProjects();populateEvidenceProjects();toast(old?'Project updated successfully.':'Project created successfully.');go('projects',document.querySelector('#ngoNav button[onclick*=\"projects\"]'));
+}
+function renderProjectOverview(){
+ const el=document.getElementById('ngoProjectOverview'); if(!el)return;
+ const a=getProjects();
+ if(!a.length){el.innerHTML='<div class="notice">No project details available yet. Project records will appear here when added to the system.</div>';return;}
+ el.innerHTML=a.map(p=>{const target=Number(p.target||0),raised=Number(p.raised||0),pct=target?Math.min(100,Math.round(raised/target*100)):0; const ev=getEvidence().filter(e=>e.projectId===p.id||e.project===p.title).length; return `<div class="project-overview-card"><div class="project-overview-top"><div><h3>${escapeHtml(p.title)}</h3><div class="mini muted">📍 ${escapeHtml(p.location||'Location not set')}</div></div><span class="badge verified">${escapeHtml(p.status||'ACTIVE')}</span></div><p class="muted" style="margin:10px 0 0;line-height:1.5">${escapeHtml(p.description||'No description added.')}</p><div class="project-meta"><div><small>Funding</small><b>₹${raised.toLocaleString('en-IN')} / ₹${target.toLocaleString('en-IN')}</b></div><div><small>Progress</small><b>${Number(p.progress||0)}%</b></div><div><small>Beneficiaries</small><b>${escapeHtml(p.beneficiaries||'—')}</b></div><div><small>Evidence Records</small><b>${ev}</b></div></div><div class="progress-track" style="margin-top:12px"><i style="width:${pct}%"></i></div><div class="milestone-line"><b>Milestones:</b> ${escapeHtml(p.milestones||'Not added yet.')}</div><div class="project-detail-actions"><button class="btn secondary" onclick="showProjectDetail('${p.id}')">View Full Details</button><button class="btn secondary" onclick="openEvidenceForProject('${p.id}')">📷 Evidence</button><button class="btn secondary" onclick="viewProjectMap('${p.id}')">🗺 Map</button></div></div>`}).join('');
+}
+function showProjectDetail(id){
+ const p=getProjects().find(x=>x.id===id); if(!p)return;
+ const target=Number(p.target||0),raised=Number(p.raised||0),pct=Number(p.progress||0);
+ const ev=getEvidence().filter(e=>e.projectId===p.id||e.project===p.title);
+ document.getElementById('pdTitle').textContent=p.title||'Project';
+ document.getElementById('pdBody').innerHTML=`<p class="muted" style="line-height:1.6">${escapeHtml(p.description||'No description added.')}</p><div class="detail-grid"><div class="detail-item"><small>Status</small><b>${escapeHtml(p.status||'ACTIVE')}</b></div><div class="detail-item"><small>Project ID</small><b>${escapeHtml(p.id)}</b></div><div class="detail-item"><small>Location</small><b>📍 ${escapeHtml(p.location||'—')}</b></div><div class="detail-item"><small>Timeline</small><b>${escapeHtml(p.timeline||'—')}</b></div><div class="detail-item"><small>Beneficiaries</small><b>${escapeHtml(p.beneficiaries||'—')}</b></div><div class="detail-item"><small>Evidence records</small><b>${ev.length}</b></div><div class="detail-item detail-wide"><small>Funding</small><b>₹${raised.toLocaleString('en-IN')} raised of ₹${target.toLocaleString('en-IN')} target</b><div class="detail-progress"><i style="width:${target?Math.min(100,raised/target*100):0}%"></i></div></div><div class="detail-item detail-wide"><small>Project completion</small><b>${pct}%</b><div class="detail-progress"><i style="width:${Math.max(0,Math.min(100,pct))}%"></i></div></div><div class="detail-item detail-wide"><small>Budget breakdown</small><b>${escapeHtml(p.budget||'Not added yet.')}</b></div><div class="detail-item detail-wide"><small>Milestones</small><b>${escapeHtml(p.milestones||'Not added yet.')}</b></div></div>`;
+ document.getElementById('projectDetailModal').style.display='flex';
+}
+function closeProjectDetail(){document.getElementById('projectDetailModal').style.display='none'}
+
+function populateNgoProjectDetails(){
+ const sel=document.getElementById('ngoProjectDetailSelect'); if(!sel)return;
+ const a=getProjects();
+ sel.innerHTML=a.length?a.map(p=>`<option value="${p.id}">${escapeHtml(p.title)}</option>`).join(''):'<option value="">No projects yet</option>';
+ renderNgoProjectDetails();
+}
+function renderNgoProjectDetails(){
+ const sel=document.getElementById('ngoProjectDetailSelect'),el=document.getElementById('ngoProjectDetailContent'); if(!sel||!el)return;
+ const a=getProjects(),p=a.find(x=>x.id===sel.value)||a[0];
+ if(!p){el.innerHTML='<div class="notice">No project details available yet. Add a project from the project management version of the prototype.</div>';return;}
+ const target=Number(p.target||0),raised=Number(p.raised||0),pct=Math.max(0,Math.min(100,Number(p.progress)||0));
+ const ev=getEvidence().filter(e=>e.projectId===p.id||e.project===p.title);
+ const gps=ev.filter(e=>e.gps).length;
+ el.innerHTML=`<div class="hero" style="margin-bottom:16px"><div><h2 style="margin:0 0 6px">${escapeHtml(p.title)}</h2><p style="margin:0">${escapeHtml(p.description||'No project description added.')}</p></div><div class="hero-score"><strong>${pct}%</strong><small>PROJECT PROGRESS</small></div></div>
+ <div class="cards"><div class="card"><div class="label">Funding</div><div class="value">₹${raised.toLocaleString('en-IN')}</div><div class="sub">of ₹${target.toLocaleString('en-IN')} target</div></div><div class="card"><div class="label">Beneficiaries</div><div class="value" style="font-size:20px">${escapeHtml(p.beneficiaries||'—')}</div><div class="sub">People supported</div></div><div class="card"><div class="label">Evidence</div><div class="value">${ev.length}</div><div class="sub green">${gps}/${ev.length||0} GPS captured</div></div><div class="card"><div class="label">Status</div><div class="value" style="font-size:20px">${escapeHtml(p.status||'ACTIVE')}</div><div class="sub">Updated ${p.updated?new Date(p.updated).toLocaleDateString():'—'}</div></div></div>
+ <div class="grid" style="margin-top:16px"><div class="panel"><h3>Project Information</h3><div class="detail-grid"><div class="detail-item"><small>Project ID</small><b>${escapeHtml(p.id)}</b></div><div class="detail-item"><small>Location</small><b>📍 ${escapeHtml(p.location||'—')}</b></div><div class="detail-item"><small>Timeline</small><b>${escapeHtml(p.timeline||'—')}</b></div><div class="detail-item"><small>Completion</small><b>${pct}%</b></div><div class="detail-item detail-wide"><small>Funding Progress</small><b>₹${raised.toLocaleString('en-IN')} / ₹${target.toLocaleString('en-IN')}</b><div class="detail-progress"><i style="width:${target?Math.min(100,raised/target*100):0}%"></i></div></div><div class="detail-item detail-wide"><small>Budget Breakdown</small><b>${escapeHtml(p.budget||'Not added yet.')}</b></div></div></div><div class="panel"><h3>Milestones</h3><div class="milestone-line" style="border-top:0;padding-top:0">${escapeHtml(p.milestones||'No milestones added yet.')}</div><div class="project-detail-actions"><button class="btn secondary" onclick="openEvidenceForProject('${p.id}')">📷 View / Add Evidence</button><button class="btn secondary" onclick="viewProjectMap('${p.id}')">🗺 View Project Map</button></div></div></div>
+ <div class="panel" style="margin-top:16px"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><div><h3 style="margin:0">Evidence Timeline</h3><small>Every record is linked to this project with capture time and GPS when available.</small></div><span class="badge verified">${ev.length} RECORDS</span></div><div style="margin-top:12px">${ev.length?ev.map((e,i)=>`<div class="evidence-card"><div style="display:flex;gap:12px;align-items:center"><div class="evidence-thumb" style="display:grid;place-items:center;font-size:24px">${e.type==='photo'?'📷':e.type==='video'?'🎥':'🧾'}</div><div><b>${escapeHtml(e.fileName)}</b><div class="muted mini">${e.type.toUpperCase()} · ${new Date(e.capturedAt).toLocaleString()}</div><div class="muted mini">${e.gps?`📍 ${e.gps.lat}, ${e.gps.lng} · ±${e.gps.accuracy||'—'}m`:'⚠ GPS unavailable'}</div></div><span class="badge verified" style="margin-left:auto">${escapeHtml(e.status||'SUBMITTED')}</span></div></div>`).join(''):'<div class="notice">No evidence has been uploaded for this project yet.</div>'}</div></div>`;
+}
+function renderProjects(){
+ const el=document.getElementById('projectList');if(!el)return;const a=getProjects();
+ if(!a.length){el.innerHTML='<div class="notice">No projects yet. Click <b>Create New Project</b> to create your first project.</div>';return}
+ el.innerHTML=a.map(p=>`<div class="evidence-card project-card">
+ <div class="project-card-top"><div><h3 style="margin:0 0 5px">${escapeHtml(p.title)}</h3><div class="muted mini">📍 ${escapeHtml(p.location)} · ${p.progress||0}% progress · ₹${Number(p.target||0).toLocaleString('en-IN')} goal</div></div><div class="project-card-actions"><button class="btn primary" onclick="editProject('${p.id}')">✏ Edit Project</button><button class="btn secondary" onclick="openEvidenceForProject('${p.id}')">📷 Add Evidence</button><button class="btn secondary" onclick="viewProjectMap('${p.id}')">🗺 Map</button></div></div>
+ <div class="project-status-row"><span class="badge verified">${p.status||'ACTIVE'}</span><span class="mini muted">Updated ${p.updated?new Date(p.updated).toLocaleDateString():'—'}</span></div>
+ <p class="muted" style="margin:10px 0">${escapeHtml(p.description||'No description added.')}</p>
+ <div class="project-progress"><div><span>Project progress</span><b>${p.progress||0}%</b></div><div class="progress-track"><i style="width:${Math.max(0,Math.min(100,Number(p.progress)||0))}%"></i></div></div>
+ <div class="quick-edit-hint">✏ <b>Edit anytime:</b> title, target, location, timeline, beneficiaries, budget, milestones and progress.</div>
+ </div>`).join('');
+}
+function escapeHtml(v){return String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
+function getEvidence(){try{return JSON.parse(localStorage.getItem('trustscore_evidence')||'[]')}catch(e){return[]}}
+function saveEvidence(a){localStorage.setItem('trustscore_evidence',JSON.stringify(a))}
+let currentGPS=null;
+function getCurrentGPS(){
+ const status=document.getElementById('gpsStatus');
+ if(!navigator.geolocation){status.textContent='GPS is not supported by this browser.';return}
+ status.textContent='Requesting current location…';
+ navigator.geolocation.getCurrentPosition(pos=>{currentGPS={lat:Number(pos.coords.latitude.toFixed(6)),lng:Number(pos.coords.longitude.toFixed(6)),accuracy:Math.round(pos.coords.accuracy||0),capturedAt:new Date().toISOString()};status.innerHTML=`<b>GPS captured:</b> ${currentGPS.lat}, ${currentGPS.lng} · accuracy ±${currentGPS.accuracy} m · ${new Date(currentGPS.capturedAt).toLocaleString()}`;const link=document.getElementById('gpsMapLink');link.href=`https://www.google.com/maps?q=${currentGPS.lat},${currentGPS.lng}`;link.style.display='inline-block';toast('GPS location captured.');},err=>{status.textContent='Could not capture GPS: '+err.message+'. On phones, allow location permission and use HTTPS or localhost.'},{enableHighAccuracy:true,timeout:15000,maximumAge:0});
+}
+function openMapForGPS(){if(!currentGPS){toast('Capture GPS first.');return}window.open(`https://www.google.com/maps?q=${currentGPS.lat},${currentGPS.lng}`,'_blank')}
+function viewProjectMap(id){const p=getProjects().find(x=>x.id===id);if(!p)return; if(p.gps)window.open(`https://www.google.com/maps?q=${p.gps.lat},${p.gps.lng}`,'_blank');else toast('No GPS has been attached to this project yet. Capture evidence with GPS first.')}
+function populateEvidenceProjects(selected){const s=document.getElementById('evidenceProject');if(!s)return;const a=getProjects();s.innerHTML=a.map(p=>`<option value="${p.id}">${escapeHtml(p.title)}</option>`).join('');if(selected)s.value=selected;refreshEvidence()}
+function openEvidenceForProject(id){populateEvidenceProjects(id);go('evidence',document.querySelector('#ngoNav button[onclick*="evidence"]'))}
+function captureEvidenceFile(input,type){
+ const file=input.files?.[0];if(!file)return;const pid=document.getElementById('evidenceProject').value;if(!pid){toast('Create a project first.');input.value='';return}
+ if(!currentGPS){toast('Please capture GPS before adding evidence.');input.value='';return}
+ const finish=(dataUrl='')=>{const a=getEvidence();const e={id:'EVD-'+Date.now().toString(36).toUpperCase(),projectId:pid,projectTitle:getProjects().find(x=>x.id===pid)?.title||'Project',type,fileName:file.name,fileSize:file.size,dataUrl:type==='photo'?dataUrl:'',gps:currentGPS,capturedAt:new Date().toISOString(),status:'SUBMITTED'};a.unshift(e);saveEvidence(a);const ps=getProjects(),p=ps.find(x=>x.id===pid);if(p){p.gps=currentGPS;p.updated=new Date().toISOString();saveProjects(ps)}input.value='';refreshEvidence();renderProjects();toast('Evidence '+e.id+' captured with GPS and timestamp.')};
+ if(type==='photo'){const r=new FileReader();r.onload=()=>compressImage(r.result,finish);r.readAsDataURL(file)}else finish('');
+}
+function compressImage(src,cb){const img=new Image();img.onload=()=>{const max=900,scale=Math.min(1,max/Math.max(img.width,img.height)),c=document.createElement('canvas');c.width=Math.round(img.width*scale);c.height=Math.round(img.height*scale);c.getContext('2d').drawImage(img,0,0,c.width,c.height);cb(c.toDataURL('image/jpeg',.72))};img.onerror=()=>cb('');img.src=src}
+function refreshEvidence(){const pid=document.getElementById('evidenceProject')?.value;const ev=getEvidence().filter(e=>e.projectId===pid);const sum=document.getElementById('evidenceSummary'),tl=document.getElementById('ngoEvidenceTimeline');if(!sum||!tl)return;sum.innerHTML=`<div class="row"><span>📦 Evidence items</span><b>${ev.length}</b></div><div class="row"><span>📍 GPS captured</span><b class="green">${ev.filter(e=>e.gps).length}/${ev.length}</b></div><div class="row"><span>🕒 Timestamped</span><b class="green">${ev.length}/${ev.length}</b></div><div class="row"><span>📷 Photos</span><b>${ev.filter(e=>e.type==='photo').length}</b></div><div class="row"><span>🎥 Videos</span><b>${ev.filter(e=>e.type==='video').length}</b></div><div class="row"><span>🧾 Documents</span><b>${ev.filter(e=>e.type==='document').length}</b></div>`;tl.innerHTML=ev.length?ev.map(e=>`<div class="evidence-card"><div style="display:flex;gap:12px;align-items:center">${e.dataUrl?`<img class="evidence-thumb" src="${e.dataUrl}" alt="evidence">`:'<div class="evidence-thumb" style="display:grid;place-items:center;font-size:24px">'+(e.type==='video'?'🎥':'🧾')+'</div>'}<div><b>${escapeHtml(e.fileName)}</b><div class="muted mini">${e.type.toUpperCase()} · ${new Date(e.capturedAt).toLocaleString()} · ${e.gps?e.gps.lat+', '+e.gps.lng:'GPS unavailable'}</div>${e.gps?`<a class="maplink" href="https://www.google.com/maps?q=${e.gps.lat},${e.gps.lng}" target="_blank">View GPS on Map ↗</a>`:''}</div></div><div style="margin-top:8px"><span class="badge verified">${e.status}</span> <span class="mini muted">Evidence ID: ${e.id}</span></div></div>`).join(''):'<div class="notice">No evidence captured for this project yet.</div>';
+}
+function getDonorUpdates(){try{return JSON.parse(localStorage.getItem('trustscore_donor_updates')||'[]')}catch(e){return[]}}
+function saveDonorUpdates(a){localStorage.setItem('trustscore_donor_updates',JSON.stringify(a))}
+function populateUpdateProjects(){
+ const sel=document.getElementById('updateProject'); if(!sel)return;
+ const a=getProjects();
+ sel.innerHTML=a.length?a.map(p=>`<option value="${p.id}">${escapeHtml(p.title)}</option>`).join(''):'<option value="">Create a project first</option>';
+ updateProjectPlaceholder();
+}
+function updateProjectPlaceholder(){
+ const p=getProjects().find(x=>x.id===document.getElementById('updateProject')?.value);
+ const h=document.getElementById('updateHeadline');
+ if(h && !h.value && p) h.placeholder='e.g. '+p.title+' — latest progress update';
+ renderDonorUpdates();
+}
+function clearDonorUpdateForm(){
+ ['updateHeadline','updateMessage','updateAmount','updateEvidenceRef'].forEach(id=>{const e=document.getElementById(id);if(e)e.value=''});
+ const t=document.getElementById('updateType');if(t)t.value='Progress Update';
+}
+function publishDonorUpdate(){
+ const pid=document.getElementById('updateProject')?.value;
+ const p=getProjects().find(x=>x.id===pid);
+ const type=document.getElementById('updateType')?.value||'Progress Update';
+ const headline=document.getElementById('updateHeadline')?.value.trim();
+ const message=document.getElementById('updateMessage')?.value.trim();
+ const amount=Number(document.getElementById('updateAmount')?.value||0);
+ const evidenceRef=document.getElementById('updateEvidenceRef')?.value.trim();
+ if(!p){toast('Create a project before publishing an update.');return}
+ if(!headline||!message){toast('Please add a headline and message.');return}
+ const a=getDonorUpdates();
+ a.unshift({id:'UPD-'+Date.now().toString(36).toUpperCase(),projectId:pid,projectTitle:p.title,type,headline,message,amount,evidenceRef,publishedAt:new Date().toISOString(),status:'PUBLISHED'});
+ saveDonorUpdates(a); clearDonorUpdateForm(); renderDonorUpdates(); toast('Donor update published successfully.');
+}
+function renderDonorUpdates(){
+ const list=document.getElementById('donorUpdatesList'),sum=document.getElementById('updateSummary'),badge=document.getElementById('updateCountBadge');
+ if(!list)return;
+ const a=getDonorUpdates();
+ if(badge)badge.textContent=a.length+' PUBLISHED';
+ if(sum)sum.innerHTML=`<div class="row"><span>📢 Published updates</span><b>${a.length}</b></div><div class="row"><span>💰 Spending updates</span><b>${a.filter(x=>x.type==='Spending Update').length}</b></div><div class="row"><span>🏁 Milestone updates</span><b>${a.filter(x=>x.type==='Milestone Completed').length}</b></div><div class="row"><span>📸 Evidence updates</span><b>${a.filter(x=>x.type==='Evidence Update').length}</b></div>`;
+ list.innerHTML=a.length?a.map(u=>`<div class="evidence-card"><div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap"><div><span class="badge verified">${escapeHtml(u.type)}</span><h3 style="margin:8px 0 4px">${escapeHtml(u.headline)}</h3><div class="muted mini">${escapeHtml(u.projectTitle)} · ${new Date(u.publishedAt).toLocaleString()}</div></div><span class="mini muted">${u.id}</span></div><p style="margin:12px 0">${escapeHtml(u.message)}</p>${u.amount?`<div class="row"><span>💰 Amount reported</span><b>₹${Number(u.amount).toLocaleString('en-IN')}</b></div>`:''}${u.evidenceRef?`<div class="notice" style="margin-top:10px">🔗 Linked evidence: <b>${escapeHtml(u.evidenceRef)}</b></div>`:''}<div style="margin-top:10px"><span class="badge verified">✓ PUBLISHED TO DONORS</span></div></div>`).join(''):'<div class="notice">No donor updates published yet. Create the first progress update above.</div>';
+}
+
+function getFunds(){try{return JSON.parse(localStorage.getItem('trustscore_fund_transactions')||'[]')}catch(e){return[]}}
+function saveFunds(a){localStorage.setItem('trustscore_fund_transactions',JSON.stringify(a))}
+function populateFundProjects(){const sel=document.getElementById('fundProject');if(!sel)return;const a=getProjects();const old=sel.value;sel.innerHTML=a.length?a.map(p=>`<option value="${p.id}">${escapeHtml(p.title)}</option>`).join(''):'<option value="">Create a project first</option>';if(a.some(p=>p.id===old))sel.value=old;const d=document.getElementById('fundDate');if(d&&!d.value)d.value=new Date().toISOString().slice(0,10);}
+function clearFundForm(){['fundDescription','fundAmount','fundReference'].forEach(id=>{const e=document.getElementById(id);if(e)e.value=''});const d=document.getElementById('fundDate');if(d)d.value=new Date().toISOString().slice(0,10);const t=document.getElementById('fundType');if(t)t.value='Expense'}
+function addFundTransaction(){const pid=document.getElementById('fundProject')?.value,p=getProjects().find(x=>x.id===pid);const type=document.getElementById('fundType')?.value||'Expense',description=document.getElementById('fundDescription')?.value.trim(),amount=Number(document.getElementById('fundAmount')?.value||0),reference=document.getElementById('fundReference')?.value.trim(),date=document.getElementById('fundDate')?.value||new Date().toISOString().slice(0,10);if(!p){toast('Create a project before adding fund records.');return}if(!description||amount<=0){toast('Please enter a description and valid amount.');return}const a=getFunds();a.unshift({id:'FUN-'+Date.now().toString(36).toUpperCase(),projectId:pid,projectTitle:p.title,type,description,amount,reference,date,createdAt:new Date().toISOString()});saveFunds(a);clearFundForm();renderFunds();toast(type+' recorded successfully.')}
+function renderFunds(){const pid=document.getElementById('fundProject')?.value,a=getFunds().filter(x=>x.projectId===pid),sum=document.getElementById('fundSummary'),list=document.getElementById('fundTransactions'),badge=document.getElementById('fundCountBadge');if(!sum||!list)return;const received=a.filter(x=>x.type==='Funds Received').reduce((n,x)=>n+Number(x.amount||0),0),spent=a.filter(x=>x.type==='Expense').reduce((n,x)=>n+Number(x.amount||0),0),balance=received-spent;if(badge)badge.textContent=a.length+' RECORDS';sum.innerHTML=`<div class="row"><span>💵 Funds received</span><b class="green">₹${received.toLocaleString('en-IN')}</b></div><div class="row"><span>🧾 Total expenses</span><b>₹${spent.toLocaleString('en-IN')}</b></div><div class="row"><span>💼 Remaining balance</span><b class="${balance>=0?'green':'red'}">₹${balance.toLocaleString('en-IN')}</b></div><div class="row"><span>📋 Transactions</span><b>${a.length}</b></div>`;list.innerHTML=a.length?a.map(x=>`<div class="evidence-card"><div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap"><div><span class="badge ${x.type==='Funds Received'?'verified':''}">${escapeHtml(x.type)}</span><h3 style="margin:8px 0 4px">${escapeHtml(x.description)}</h3><div class="muted mini">${escapeHtml(x.date)} · ${x.id}</div></div><strong>₹${Number(x.amount).toLocaleString('en-IN')}</strong></div>${x.reference?`<div class="notice" style="margin-top:10px">🧾 Reference / Bill: <b>${escapeHtml(x.reference)}</b></div>`:''}</div>`).join(''):'<div class="notice">No fund transactions recorded for this project yet.</div>'}
+function createCampaign(){let p=document.getElementById('purpose').value,a=document.getElementById('amount').value,l=document.getElementById('location').value;if(!p||!a||!l){toast('Please complete purpose, amount and location.');return}toast('Campaign created — moving to evidence capture.');setTimeout(()=>go('evidence',document.querySelectorAll('.nav button')[3]),500)}
+function filterRows(q){q=q.toLowerCase();document.querySelectorAll('#campaignTable tbody tr').forEach(r=>r.style.display=r.innerText.toLowerCase().includes(q)?'':'none')}
+
+let authRole='ngo';
+function setAuthRole(role){
+ authRole=role;
+ document.getElementById('ngoRoleBtn').classList.toggle('on',role==='ngo');
+ document.getElementById('donorRoleBtn').classList.toggle('on',role==='donor');
+ const ngo=role==='ngo';
+ document.getElementById('loginRoleHint').innerHTML='Signing in as <b>'+(ngo?'NGO / Organization':'Donor')+'</b>';
+ document.getElementById('registerRoleHint').innerHTML='Creating <b>'+(ngo?'NGO / Organization':'Donor')+'</b> account';
+ document.getElementById('ngoRegisterFields').style.display=ngo?'block':'none';
+ document.getElementById('donorRegisterFields').style.display=ngo?'none':'block';
+ document.getElementById('regOrg').required=ngo;
+ document.getElementById('regName').required=!ngo;
+ document.getElementById('createRoleText').textContent=ngo?'NGO':'Donor';
+ document.getElementById('loginEmail').placeholder=ngo?'ngo@example.com':'donor@example.com';
+}
+function authMode(mode){
+ const login=mode==='login';
+ document.getElementById('loginForm').style.display=login?'grid':'none';
+ document.getElementById('registerForm').style.display=login?'none':'grid';
+ document.getElementById('loginTab').classList.toggle('on',login);
+ document.getElementById('registerTab').classList.toggle('on',!login);
+ document.getElementById('loginMsg').className='auth-msg';document.getElementById('regMsg').className='auth-msg';
+}
+function togglePassword(id,btn){const x=document.getElementById(id);x.type=x.type==='password'?'text':'password';btn.textContent=x.type==='password'?'Show':'Hide'}
+function getAccounts(){try{const a=JSON.parse(localStorage.getItem('trustscore_accounts')||'[]');return a.map(x=>({...x,role:x.role||'ngo',name:x.name||x.org||'NGO'}))}catch(e){return[]}}
+function register(e){
+ e.preventDefault();
+ const email=document.getElementById('regEmail').value.trim().toLowerCase(),pw=document.getElementById('regPassword').value,cp=document.getElementById('regConfirm').value,msg=document.getElementById('regMsg');
+ const displayName=authRole==='ngo'?document.getElementById('regOrg').value.trim():document.getElementById('regName').value.trim();
+ if(!displayName){msg.textContent=authRole==='ngo'?'Enter the NGO / organization name.':'Enter your full name.';msg.className='auth-msg error';return}
+ if(pw.length<8){msg.textContent='Password must contain at least 8 characters.';msg.className='auth-msg error';return}
+ if(pw!==cp){msg.textContent='Passwords do not match.';msg.className='auth-msg error';return}
+ let a=getAccounts(); if(a.some(x=>x.email===email && x.role===authRole)){msg.textContent='An account with this email and role already exists.';msg.className='auth-msg error';return}
+ a.push({name:displayName,org:authRole==='ngo'?displayName:'',email,password:pw,role:authRole,created:new Date().toISOString()});localStorage.setItem('trustscore_accounts',JSON.stringify(a));
+ msg.textContent=(authRole==='ngo'?'NGO':'Donor')+' account created successfully. You can now sign in.';msg.className='auth-msg ok';
+ setTimeout(()=>{authMode('login');document.getElementById('loginEmail').value=email;document.getElementById('loginPassword').value=pw},700);
+}
+function login(e){
+ e.preventDefault();const email=document.getElementById('loginEmail').value.trim().toLowerCase(),pw=document.getElementById('loginPassword').value,msg=document.getElementById('loginMsg'),a=getAccounts(),u=a.find(x=>x.email===email && x.role===authRole);
+ if(!u){msg.textContent='No '+(authRole==='ngo'?'NGO':'Donor')+' account found for this email. Create the correct account type first.';msg.className='auth-msg error';return}
+ if(u.password!==pw){msg.textContent='Incorrect password. Please try again.';msg.className='auth-msg error';return}
+ localStorage.setItem('trustscore_session',JSON.stringify({email:u.email,role:u.role}));
+ const orgEl=document.getElementById('setOrg'),emailEl=document.getElementById('setEmail');if(orgEl)orgEl.textContent=u.org||u.name;if(emailEl)emailEl.textContent=u.email;
+ document.getElementById('authOverlay').style.display='none';
+ if(u.role==='donor'){enterDonorPortal(u)} else {enterNgoPortal(u)}
+}
+function enterNgoPortal(u){
+ document.getElementById('ngoNav').style.display='block';document.getElementById('donorNav').style.display='none';
+ document.querySelectorAll('.nav button').forEach(b=>b.style.display='');
+ document.querySelector('.role').textContent='NGO / Organization Console';
+ const p=document.querySelector('.profile');if(p)p.textContent=(u.org||u.name)+' • NGO ▾';
+ go('dashboard',document.querySelector('#ngoNav button'));toast('Welcome, '+(u.org||u.name)+'. NGO portal loaded.');
+}
+function enterDonorPortal(u){
+ document.getElementById('ngoNav').style.display='none';document.getElementById('donorNav').style.display='block';
+ document.querySelectorAll('.nav button').forEach(b=>b.style.display='');
+ const p=document.querySelector('.profile');if(p)p.textContent=u.name+' • Donor ▾';
+ const donorBtn=document.querySelector('#donorNav button');go('donate',donorBtn);toast('Welcome, '+u.name+'. Donor portal loaded.');
+}
+function checkStrength(){const p=document.getElementById('regPassword').value,s=document.getElementById('strength');let n=p.length>=12&&/[A-Z]/.test(p)&&/[0-9]/.test(p)&&/[^A-Za-z0-9]/.test(p)?'Strong':p.length>=8&&(/[A-Z]/.test(p)||/[0-9]/.test(p))?'Good':'Weak';s.textContent='Password strength: '+n}
+function settingsTab(id,btn){document.querySelectorAll('.setting-pane').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('.settings-menu button').forEach(x=>x.classList.remove('on'));btn.classList.add('on')}
+function toggleSetting(el){el.classList.toggle('on');toast(el.classList.contains('on')?'Setting enabled':'Setting disabled')}
+function processDonation(){
+ const amount=Number(document.getElementById('donationAmount').value), method=document.getElementById('paymentMethod').value, msg=document.getElementById('donorMessage').value.trim();
+ const out=document.getElementById('donationResult');
+ if(!Number.isFinite(amount)||amount<10){out.innerHTML='<div class="notice danger"><b>Invalid amount.</b><br>Please enter at least ₹10.</div>';return}
+ const ref='DON-'+Date.now().toString(36).toUpperCase();
+ const donation={reference:ref,amount,method,message:msg,campaign:'Community Food Drive',timestamp:new Date().toISOString(),status:'Simulated Payment Success'};
+ const history=JSON.parse(localStorage.getItem('trustscore_donations')||'[]'); history.unshift(donation); localStorage.setItem('trustscore_donations',JSON.stringify(history));
+ out.innerHTML='<div class="notice success"><b>✓ Donation recorded successfully</b><br>Reference: <strong>'+ref+'</strong><br>Amount: <strong>₹'+amount.toLocaleString('en-IN')+'</strong> · '+method+'<br><small>This demo records the donation locally. No real money is transferred.</small></div>';
+ toast('Donation recorded: '+ref);
+}
+(function initPrototypeData(){
+ if(!localStorage.getItem('trustscore_projects')) saveProjects([{id:'PRJ-DEMO-WATER',title:'School Water System',target:100000,raised:72000,description:'Provide a reliable water system for students and staff.',location:'Pune',timeline:'1 Aug – 30 Sep 2026',beneficiaries:'420 students + 28 staff',progress:76,budget:'Pipes & materials: ₹35,000; Labour: ₹40,000; Filtration: ₹20,000',milestones:'Budget approved; materials purchased; installation; verification; operational handover.',status:'ACTIVE',created:new Date().toISOString(),updated:new Date().toISOString()}]);
+})();
+if(document.getElementById('ngoProjectOverview')) renderProjectOverview();
+
+function logout(){localStorage.removeItem('trustscore_session');document.getElementById('authOverlay').style.display='flex';setAuthRole('ngo');authMode('login')}
+
+</script>
+</body>
+</html>
